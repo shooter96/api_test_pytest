@@ -42,7 +42,7 @@ def get_value(source, steps):
     """
     根据入参字典以及取值步骤取出结果
 
-    取值步骤为 . 连接，如：data.records.0.name 含义为取 data 下 records 列表的第 0 条的 name 字段的值
+    取值步骤为 . 连接，如：datas.records.0.name 含义为取 datas 下 records 列表的第 0 条的 name 字段的值
     """
     # 分割取值步骤为列表
     keys = steps.split(".")

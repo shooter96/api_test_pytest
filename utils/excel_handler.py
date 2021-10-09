@@ -57,8 +57,8 @@ class CaseInfoHolder:
         self.case_infos = []
         # 获取登录行信息
         self.default_host = self.sheet.cell(row=4, column=2).value
-        if len(params) > 1:
-            self.default_host = params[1]
+        # if len(params) > 1:
+        #     self.default_host = params[1]
         # 构建登录信息
         self.login_info = CaseInfo()
         self.build_longin_info()
@@ -146,7 +146,7 @@ class CaseInfoHolder:
                     values = ""
                     link_values = ex_values[i].split("+")
                     for j in range(0, len(link_values)):
-                        if ":" and "data" in link_values[j]:
+                        if ":" and "datas" in link_values[j]:
                             row_step = link_values[j].split(":")
                             value = self.get_value(row_step[0], row_step[1])
                             values += value

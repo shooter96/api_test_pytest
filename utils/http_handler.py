@@ -8,7 +8,7 @@ import redis
 
 content_type = 'Content-Type'
 json_type = 'application/json'
-form_type = 'multipart/form-data'
+form_type = 'multipart/form-datas'
 
 
 class HttpHandler:
@@ -64,32 +64,25 @@ class HttpHandler:
         sleep_time = 0 if self.case_info.sleep is None or self.case_info.sleep == ' ' \
             else self.case_info.sleep
 
-        # 判断用例是否需要执行
-        run_status = "yes" if self.case_info.run is None or self.case_info.run == ' ' \
-            else self.case_info.run
-        self.run_status = run_status.lower()
-        if self.run_status == 'yes':
-            # 请求
-            result = self.__do_request(url, headers, params, files, result)
+        # 请求
+        result = self.__do_request(url, headers, params, files, result)
 
-            # 计算请求耗时
-            time_used = int((time.time() - start) * 1000)
-            self.case_info.time_used = time_used
-            # 填充结果到用例对象中
-            self.case_info.response_content = json.dumps(result, ensure_ascii=False)
-            if 'code' in result.keys():
-                code = result['code']
-                # 防止 code 为字符串类型的数字
-                self.case_info.response_code = code if isinstance(code, int) else int(code)
-            # 校验结果
-            self.__check_status(result, case_infos)
-            # print 结果
-            self.__print_result(url)
-            # 等待
-            time.sleep(int(sleep_time))
-        else:
-            self.case_info.status = '未执行'
-            return result
+        # 计算请求耗时
+        time_used = int((time.time() - start) * 1000)
+        self.case_info.time_used = time_used
+        # 填充结果到用例对象中
+        self.case_info.response_content = json.dumps(result, ensure_ascii=False)
+        if 'code' in result.keys():
+            code = result['code']
+            # 防止 code 为字符串类型的数字
+            self.case_info.response_code = code if isinstance(code, int) else int(code)
+        # 校验结果
+        compare_data = self.__check_status(result, case_infos)
+        # print 结果
+        self.__print_result(url)
+        # 等待
+        time.sleep(int(sleep_time))
+        return result, compare_data
 
     def __build_request(self):
         # 得到请求参数
@@ -106,7 +99,7 @@ class HttpHandler:
             headers.update({content_type: json_type})
             # 将字典转为字符串
             params = json.dumps(self.case_info.params).encode('utf-8').decode('latin-1')
-        # 有 multipart/form-data 的 Content-Type 认为很有可能有文件上传
+        # 有 multipart/form-datas 的 Content-Type 认为很有可能有文件上传
         elif headers[content_type] == form_type:
             # 上传文件时不需要显示设置 Content-Type
             headers.pop(content_type)
@@ -208,17 +201,13 @@ class HttpHandler:
                 # 否则按照依赖步骤取出依赖值，填充预期字典
                 ci = json.loads(getattr(ci, 'response_content'))
                 expected.update({expected_keys[i]: get_value(ci, row_steps[1])})
-            # 判断断言的值是否是bool值
-            # if isinstance(get_value(result, check_steps[i]), bool):
-            #     response.update({expected_keys[i]: get_value(result, check_steps[i])})
-            # else:
-            #     response.update({expected_keys[i]: str(get_value(result, check_steps[i]))})
             response.update({expected_keys[i]: str(get_value(result, check_steps[i]))})
             # 填入结果
             if expected == response:
                 self.case_info.status = 'passed'
             else:
                 self.case_info.status = 'failed'
+        return expected, response
 
     def __print_result(self, url):
         """
