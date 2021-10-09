@@ -40,7 +40,7 @@ class ExcelParser:
 
 class CaseInfoHolder:
 
-    def __init__(self, work_book, sheet_name, params):
+    def __init__(self, work_book, sheet_name, host):
         """
         解析当前 sheet 页为 CaseInfo 对象列表
 
@@ -55,10 +55,9 @@ class CaseInfoHolder:
         self.title = [column.value for column in self.rows[4]]
         # 定义持有的用例列表
         self.case_infos = []
-        # 获取登录行信息
-        self.default_host = self.sheet.cell(row=4, column=2).value
-        # if len(params) > 1:
-        #     self.default_host = params[1]
+        # 获取host信息
+        # self.default_host = self.sheet.cell(row=4, column=2).value
+        self.default_host = host
         # 构建登录信息
         self.login_info = CaseInfo()
         self.build_longin_info()

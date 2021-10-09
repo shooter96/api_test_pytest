@@ -5,13 +5,15 @@ import sys
 import time
 
 import pytest
-
+from utils.yaml_handler import do_yaml
 from utils.excel_handler import ExcelParser, CaseInfoHolder, ExcelWriter
 from utils.http_handler import HttpHandler
 from utils.test_utils import isExcel, str_is_none
 
 
 class TestPermissionCase:
+    host = 'http://' + str(do_yaml.read('test_env', 'host')) + ":" + str(do_yaml.read('test_env', 'port'))
+
     def test_permission(self):
         send = 0
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -74,7 +76,7 @@ class TestPermissionCase:
             sheet_names = src_parser.get_sheet_names()
             # 循环 sheet 页
             for sheet_name in sheet_names:
-                holder = CaseInfoHolder(src_parser.work_book, sheet_name, sys.argv)
+                holder = CaseInfoHolder(src_parser.work_book, sheet_name, self.host)
                 print('sheetName:[{}]'.format(sheet_name))
                 cookie = HttpHandler(holder.login_info).get_cookie()
                 for case_info in holder.case_infos:
