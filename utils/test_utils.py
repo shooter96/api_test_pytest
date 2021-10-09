@@ -1,5 +1,7 @@
 import struct
 
+from utils.emaillib.email_support import send_text
+
 
 def str_is_none(source):
     """
@@ -105,5 +107,28 @@ def __bytes2hex(bin_file_header):
         hex_str += t
     return hex_str.upper()
 
-def set_cases():
-    pass
+
+def email_content(host, results, case_num, file=None):
+    if not bool(results):
+        content = '本次测试无可执行文件，请检查是否在 case 下放置可执行文件了'
+    else:
+        content = '测试结果:\n\n'
+        for res in results:
+            content += '用例报告文件：' + res.get('target') + '\n'
+            if res.get('failed_num') == 0:
+                content += '用例执行全部通过！！'
+            else:
+                content += '失败:' + str(res.get('failed_num')) + '\t成功:' + str(res.get('success_num')) + '\n'
+                content += '存在用例执行失败的Sheet:' + '\t{}\n'.format(res.get('sheets'))
+            content += '\n\n'
+        content += '执行测试用例总数：' + str(case_num.get('run_total')) + '\n'
+        content += '测试用例执行详情见附件！' + '\n\n'
+        if host == 'http://10.30.30.31:38080':
+            coverage_host = host.replace('38080', '45000')
+            content += '以下是覆盖率报告链接：' + '\n'
+            content += 'dmc报告: {}/report/isc-dmc-service/report/index.html'.format(coverage_host) + '\n'
+            # content += 'shadow报告: http://192.168.10.34:45000/report/isc-shadow-service/report/index.html' + '\n'
+            content += 'proxy报告: {}/report/isc-proxy-service/report/index.html'.format(coverage_host) + '\n'
+            content += 'video报告: {}/report/isc-video-service/report/index.html'.format(coverage_host) + '\n'
+            content += 'permission报告: {}/report/isc-permission-service/report/index.html'.format(coverage_host) + '\n'
+    send_text(subject='接口自动化测试报告', content=content, file=file)

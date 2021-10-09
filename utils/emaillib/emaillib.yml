@@ -1,0 +1,13 @@
+sender:
+  name: 设备组
+  addr: device-test@isyscore.com
+  host: smtp.exmail.qq.com
+  port: 465
+  password: qFy7Tp6aX44trRgb
+
+receiver:
+#  name: [ '核心业务线成员']
+#  addr: [ 'device@isyscore.com']
+
+  name: [ '王燕']
+  addr: [ 'wangy@isyscore.com']

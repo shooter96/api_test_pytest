@@ -8,7 +8,7 @@ import pytest
 from utils.yaml_handler import do_yaml
 from utils.excel_handler import ExcelParser, CaseInfoHolder, ExcelWriter
 from utils.http_handler import HttpHandler
-from utils.test_utils import isExcel, str_is_none
+from utils.test_utils import isExcel, str_is_none, email_content
 
 
 class TestPermissionCase:
@@ -101,6 +101,54 @@ class TestPermissionCase:
                 # 写 Excel 目标文件
                 writer = ExcelWriter(target, target_parser.work_book, target_parser.work_book[sheet_name])
                 writer.write(holder.case_infos, holder.login_info, holder.default_host)
+                # 统计请求结果
+                sheet_total_failed += len([ci for ci in holder.case_infos if getattr(ci, 'status') == 'failed'])
+                if len([ci for ci in holder.case_infos if getattr(ci, 'status') == 'failed']) != 0:
+                    failed_sheet_name.append(sheet_name)
+                    print("存在用例执行失败的表单：{}".format(failed_sheet_name))
+
+                not_run += len([ci for ci in holder.case_infos if getattr(ci, 'status') == '未执行'])
+                case_total += len(holder.case_infos)
+                # 记录存在错误的sheetName
+            result = {'target': dest_filename}
+            result.update({'total': case_total})
+            if sheet_total_failed == 0:
+                # result_dic[file_name] = (case_total, 0)
+                result.update({'failed_num': 0})
+                print('All auto test has finished, congratulations!')
+            else:
+                result.update({'failed_num': sheet_total_failed})
+                result.update({'success_num': case_total - (sheet_total_failed + not_run)})
+                result.update({'ignored': not_run})
+                result.update({'sheets': failed_sheet_name})
+                # result_dic[file_name] = (case_total - (sheet_total_failed + not_run), sheet_total_failed, failed_sheet_name)
+                print('\033[37;41mAll auto test has finished, But failed: ' + str(
+                    sheet_total_failed) + ' ,未执行:' + str(not_run) + '\033[0m')
+            # 统计每个文件执行的用例数量
+            sheet_run_total += case_total - not_run
+            result_list.append(result)
+            print('保存第', execute_count, '个结果文件: ----->', os.path.abspath(target), flush=True)
+            report_list.append(target)
+
+        else:
+            print('----------- [本次 Python 自动化测试运行完毕] -----------')
+            if execute_count > 0:
+                print('共执行', execute_count, '个文件请在同级目录 result 下查看结果', flush=True)
+                result_dict.update({"run_total": sheet_run_total})
+
+            else:
+                print('本次测试无可执行文件，请检查是否在 case 下放置可执行文件了')
+            # email_content(result_dic, file=os.getcwd() + '/result/' + dest_filename)
+            # email_content(holder.default_host, result_list, result_dict, report_list)
+
+            if 'send_email' in os.environ:
+                if os.environ['send_email'] == "否":
+                    print('不发送邮件')
+                    send = 1
+                else:
+                    send = 0
+            if send == 0:
+                email_content(holder.default_host, result_list, result_dict, report_list)
 
 
 if __name__ == '__main__':
