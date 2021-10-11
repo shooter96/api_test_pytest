@@ -91,7 +91,9 @@ class TestPermissionCase:
                         case_info.status = 'skip'
                     else:
                         result, compare_data, params = handler.execute(holder.case_infos)
-                        do_log.info(r"params：{}".format(params) + "\n")
+                        # ascii转中文
+                        do_log.info("入参：{}".format(json.dumps(params).encode().decode('unicode_escape')))
+                        do_log.info("接口返回：{}".format(result) + "\n")
                         # 该断言方式-断言失败后仍继续执行后面的代码
                         pytest.assume(compare_data[0] == compare_data[1])
                         # assert compare_data[0] == compare_data[1]
