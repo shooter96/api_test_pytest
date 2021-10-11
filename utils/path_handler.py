@@ -14,7 +14,7 @@ CONFIGS_DIR = os.path.join(BASE_DIR, 'conf')
 CONFIG_FILE_PATH = os.path.join(CONFIGS_DIR, 'testcase.yml')
 
 # 获取日志文件所在的目录路径
-LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+PERMISSION_LOGS_DIR = os.path.join(BASE_DIR, 'test/isc-permission-service/logs')
 
 # 获取报告文件所在的目录路径
 REPORTS_DIR = os.path.join(BASE_DIR, 'report')

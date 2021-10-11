@@ -2,13 +2,12 @@ import logging
 import os
 
 from utils.yaml_handler import do_yaml
-from utils.path_handler import LOGS_DIR
 
 
 class MyLogger(object):
 
     @classmethod
-    def create_logger(cls):
+    def create_logger(cls, log_path):
         """创建日志收集器 """
         # 创建一个日志收集器
         my_log = logging.getLogger(do_yaml.read("log", "log_name"))
@@ -25,7 +24,7 @@ class MyLogger(object):
         my_log.addHandler(sh)
 
         # 创建一个输出导文件的渠道
-        fh = logging.FileHandler(filename=os.path.join(LOGS_DIR, do_yaml.read("log", "logfile_name")),
+        fh = logging.FileHandler(filename=os.path.join(log_path, do_yaml.read("log", "logfile_name")),
                                  encoding='utf-8')
         fh.setLevel(do_yaml.read("log", "logfile_level"))
         # 设置输出导文件的日志格式
@@ -35,7 +34,4 @@ class MyLogger(object):
         return my_log
 
 
-do_log = MyLogger.create_logger()
-
-
-
+# do_log = MyLogger.create_logger()

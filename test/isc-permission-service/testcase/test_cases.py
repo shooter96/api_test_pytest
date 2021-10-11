@@ -6,10 +6,12 @@ import json
 
 import pytest
 from utils.yaml_handler import do_yaml
-from utils.log_handler import do_log
+from utils.log_handler import MyLogger
 from utils.excel_handler import ExcelParser, CaseInfoHolder, ExcelWriter
 from utils.http_handler import HttpHandler
 from utils.test_utils import isExcel, str_is_none, email_content
+
+from utils.path_handler import PERMISSION_LOGS_DIR
 
 
 class TestPermissionCase:
@@ -92,6 +94,7 @@ class TestPermissionCase:
                     else:
                         result, compare_data, params = handler.execute(holder.case_infos)
                         # ascii转中文
+                        do_log = MyLogger.create_logger(PERMISSION_LOGS_DIR)
                         do_log.info("入参：{}".format(json.dumps(params).encode().decode('unicode_escape')))
                         do_log.info("接口返回：{}".format(result) + "\n")
                         # 该断言方式-断言失败后仍继续执行后面的代码
