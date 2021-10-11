@@ -148,7 +148,7 @@ class TestPermissionCase:
                 else:
                     send = 0
             if send == 0:
-                email_content(holder.default_host, result_list, result_dict, report_list)
+                email_content(holder.default_host, result_list, result_dict, 'isc-permission-service', report_list)
 
 
 if __name__ == '__main__':

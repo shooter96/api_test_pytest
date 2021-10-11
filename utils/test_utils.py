@@ -108,7 +108,7 @@ def __bytes2hex(bin_file_header):
     return hex_str.upper()
 
 
-def email_content(host, results, case_num, file=None):
+def email_content(host, results, case_num, service_name, file=None):
     if not bool(results):
         content = '本次测试无可执行文件，请检查是否在 case 下放置可执行文件了'
     else:
@@ -126,9 +126,5 @@ def email_content(host, results, case_num, file=None):
         if host == 'http://10.30.30.31:38080':
             coverage_host = host.replace('38080', '45000')
             content += '以下是覆盖率报告链接：' + '\n'
-            content += 'dmc报告: {}/report/isc-dmc-service/report/index.html'.format(coverage_host) + '\n'
-            # content += 'shadow报告: http://192.168.10.34:45000/report/isc-shadow-service/report/index.html' + '\n'
-            content += 'proxy报告: {}/report/isc-proxy-service/report/index.html'.format(coverage_host) + '\n'
-            content += 'video报告: {}/report/isc-video-service/report/index.html'.format(coverage_host) + '\n'
-            content += 'permission报告: {}/report/isc-permission-service/report/index.html'.format(coverage_host) + '\n'
+            content += '{}报告: {}/report/{}/report/index.html'.format(service_name, coverage_host, service_name) + '\n'
     send_text(subject='接口自动化测试报告', content=content, file=file)
