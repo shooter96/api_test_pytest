@@ -26,7 +26,7 @@ class MyLogger(object):
 
         # 创建一个输出导文件的渠道
         fh = logging.FileHandler(filename=os.path.join(LOGS_DIR, do_yaml.read("log", "logfile_name")),
-                                 encoding='utf8')
+                                 encoding='utf-8')
         fh.setLevel(do_yaml.read("log", "logfile_level"))
         # 设置输出导文件的日志格式
         fh.setFormatter(formater)

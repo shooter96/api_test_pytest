@@ -1,3 +1,10 @@
 test_env:
   host: 10.30.30.31
   port: 38080
+log:
+  log_name: cases
+  logger_level: DEBUG
+  formatter: '%(asctime)s - [%(filename)s-->line:%(lineno)d] - %(levelname)s: %(message)s'
+  stream_level: DEBUG
+  logfile_name: test.log
+  logfile_level: DEBUG

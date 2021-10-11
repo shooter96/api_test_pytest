@@ -1,11 +1,12 @@
 import json
 import os
 import shutil
-import sys
 import time
+import json
 
 import pytest
 from utils.yaml_handler import do_yaml
+from utils.log_handler import do_log
 from utils.excel_handler import ExcelParser, CaseInfoHolder, ExcelWriter
 from utils.http_handler import HttpHandler
 from utils.test_utils import isExcel, str_is_none, email_content
@@ -30,10 +31,6 @@ class TestPermissionCase:
         result_dict = {}
         # 循环文件执行测试
         dest_filename = None
-        # not_run = 0
-        # sheet_total_failed = 0
-        # case_total = 0
-        # sheet_name = None
         report_list = []
         sheet_run_total = 0
         holder = None
@@ -93,7 +90,8 @@ class TestPermissionCase:
                     if case_info.run == 'no':
                         case_info.status = 'skip'
                     else:
-                        result, compare_data = handler.execute(holder.case_infos)
+                        result, compare_data, params = handler.execute(holder.case_infos)
+                        do_log.info(r"params：{}".format(params) + "\n")
                         # 该断言方式-断言失败后仍继续执行后面的代码
                         pytest.assume(compare_data[0] == compare_data[1])
                         # assert compare_data[0] == compare_data[1]
