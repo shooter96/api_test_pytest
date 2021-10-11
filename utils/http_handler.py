@@ -98,8 +98,7 @@ class HttpHandler:
             # 设置为 json
             headers.update({content_type: json_type})
             # 将字典转为字符串
-            # params = json.dumps(self.case_info.params).encode('utf-8').decode('latin-1')
-            params = json.dumps(self.case_info.params, ensure_ascii=False)
+            params = json.dumps(self.case_info.params).encode('utf-8').decode('latin-1')
         # 有 multipart/form-datas 的 Content-Type 认为很有可能有文件上传
         elif headers[content_type] == form_type:
             # 上传文件时不需要显示设置 Content-Type
@@ -158,10 +157,11 @@ class HttpHandler:
             # 将请求状态码加入到response
             # result['status_code'] = str(response.status_code)
             # 请求非 200 不处理
-            if response.status_code != 200:
-                result = {'code': '-1', 'message': '请求失败，请检查用例的请求路径、请求方法、请求参数是否正确'}
-        except Exception:
-            result.update({'message': '请求失败，请检查用例的请求路径、请求方法、请求参数是否正确'})
+            # if response.status_code != 200:
+                # result = {'code': '-1', 'message': '请求失败，请检查用例的请求路径、请求方法、请求参数是否正确'}
+        except Exception as e:
+            raise e
+            # result.update({'message': '请求失败，请检查用例的请求路径、请求方法、请求参数是否正确'})
 
         return result
 
