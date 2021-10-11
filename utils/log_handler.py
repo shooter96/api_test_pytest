@@ -9,7 +9,7 @@ class MyLogger(object):
 
     @classmethod
     def create_logger(cls):
-        """创建日志收集器"""
+        """创建日志收集器 tt"""
         # 创建一个日志收集器
         my_log = logging.getLogger(do_yaml.read("log", "log_name"))
         # 设置日志收集器的收集等级
