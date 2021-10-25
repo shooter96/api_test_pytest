@@ -36,10 +36,6 @@ class HttpHandler:
             if result.status_code == 200:
                 cookie_monitoring = result.headers['Set-Cookie'].split(';')[0]
                 print('登录成功 Cookie:', cookie_monitoring)
-                if self.case_info.host == 'http://10.30.30.31:38080/api/permission/auth/login':
-                    self.sync_token(cookie_monitoring.split('=')[1], '10.30.30.31', 6379, '', 15, '10.30.30.96',
-                                    26379,
-                                    'ZljIsysc0re123', 7)
                 return cookie_monitoring
             else:
                 raise Exception
