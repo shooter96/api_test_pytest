@@ -72,14 +72,15 @@ def init_case(sheet_name):
         # 得到所有 sheet 页
         sheet_names = src_parser.get_sheet_names()
         step_list = []
-
+        # 同一个datas目录下用例的sheetname要唯一,不然会被覆盖
         if sheet_name in sheet_names:
             holder = CaseInfoHolder(src_parser.work_book, sheet_name, host)
             for case_info in holder.case_infos:
                 step = case_info.step
                 step_list.append(step)
-
-        return holder, step_list
+            return holder, step_list
+        else:
+            continue
 
 
 class TestRentalCase:
@@ -111,32 +112,32 @@ class TestRentalCase:
             pytest.assume(compare_data[0] == compare_data[1])
             # assert compare_data[0] == compare_data[1]
 
-    holder, step_list = init_case("功能数据权限模块")
+    # holder, step_list = init_case("功能数据权限模块")
 
-    @pytest.mark.parametrize("case_info", holder.case_infos, ids=step_list)
-    def test_application(self, case_info):
-
-        # 填充登陆信息的 token
-        case_info.headers = {} if str_is_none(case_info.headers) else json.loads(case_info.headers)
-        if self.cookie:
-            case_info.headers.update({'Cookie': self.cookie})
-        # 填充占位符参数
-        self.holder.parse_param(case_info).parse_path(case_info)
-        handler = HttpHandler(case_info)
-        # 执行请求
-
-        # 判断用例是否需要执行
-        if case_info.run == 'no':
-            case_info.status = 'skip'
-        else:
-            result, compare_data, params = handler.execute(self.holder.case_infos)
-            # ascii转中文
-            do_log = MyLogger.create_logger(PERMISSION_LOGS_DIR)
-            do_log.info("入参：{}".format(json.dumps(params).encode().decode('unicode_escape')))
-            do_log.info("接口返回：{}".format(result) + "\n")
-            # 该断言方式-断言失败后仍继续执行后面的代码
-            pytest.assume(compare_data[0] == compare_data[1])
-            # assert compare_data[0] == compare_data[1]
+    # @pytest.mark.parametrize("case_info", holder.case_infos, ids=step_list)
+    # def test_application(self, case_info):
+    #
+    #     # 填充登陆信息的 token
+    #     case_info.headers = {} if str_is_none(case_info.headers) else json.loads(case_info.headers)
+    #     if self.cookie:
+    #         case_info.headers.update({'Cookie': self.cookie})
+    #     # 填充占位符参数
+    #     self.holder.parse_param(case_info).parse_path(case_info)
+    #     handler = HttpHandler(case_info)
+    #     # 执行请求
+    #
+    #     # 判断用例是否需要执行
+    #     if case_info.run == 'no':
+    #         case_info.status = 'skip'
+    #     else:
+    #         result, compare_data, params = handler.execute(self.holder.case_infos)
+    #         # ascii转中文
+    #         do_log = MyLogger.create_logger(PERMISSION_LOGS_DIR)
+    #         do_log.info("入参：{}".format(json.dumps(params).encode().decode('unicode_escape')))
+    #         do_log.info("接口返回：{}".format(result) + "\n")
+    #         # 该断言方式-断言失败后仍继续执行后面的代码
+    #         pytest.assume(compare_data[0] == compare_data[1])
+    #         # assert compare_data[0] == compare_data[1]
 
 
 if __name__ == '__main__':
