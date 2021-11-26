@@ -72,7 +72,7 @@ def init_case(sheet_name):
         # 得到所有 sheet 页
         sheet_names = src_parser.get_sheet_names()
         step_list = []
-        # 同一个datas目录下用例的sheetname要唯一,不然会被覆盖
+        # 同一个datas目录下用例的sheetname要唯一
         if sheet_name in sheet_names:
             holder = CaseInfoHolder(src_parser.work_book, sheet_name, host)
             for case_info in holder.case_infos:
@@ -80,7 +80,7 @@ def init_case(sheet_name):
                 step_list.append(step)
             return holder, step_list
         else:
-            continue
+            count = count + 1
 
 
 class TestRentalCase:
