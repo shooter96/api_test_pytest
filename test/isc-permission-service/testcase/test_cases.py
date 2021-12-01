@@ -1,9 +1,8 @@
-import json
 import os
-import shutil
 import time
 import json
 
+import allure
 import pytest
 from utils.yaml_handler import do_yaml
 from utils.log_handler import MyLogger
@@ -83,62 +82,26 @@ def init_case(sheet_name):
             count = count + 1
 
 
-class TestRentalCase:
-    holder, step_list = init_case("组织架构(OpenAPI)")
+@allure.title("{case_info.step}")
+def test_cases(case_info, holder, sheet):
     cookie = HttpHandler(holder.login_info).get_cookie()
+    case_info.headers = {} if str_is_none(case_info.headers) else json.loads(case_info.headers)
+    if cookie:
+        case_info.headers.update({'Cookie': cookie})
+    # 填充占位符参数
+    holder.parse_param(case_info).parse_path(case_info)
+    handler = HttpHandler(case_info)
+    # 执行请求
 
-    @pytest.mark.parametrize("case_info", holder.case_infos, ids=step_list)
-    def test_rental(self, case_info):
-
-        # 填充登陆信息的 token
-        case_info.headers = {} if str_is_none(case_info.headers) else json.loads(case_info.headers)
-        if self.cookie:
-            case_info.headers.update({'Cookie': self.cookie})
-        # 填充占位符参数
-        self.holder.parse_param(case_info).parse_path(case_info)
-        handler = HttpHandler(case_info)
-        # 执行请求
-
-        # 判断用例是否需要执行
-        if case_info.run == 'no':
-            case_info.status = 'skip'
-        else:
-            result, compare_data, params = handler.execute(self.holder.case_infos)
-            # ascii转中文
-            do_log = MyLogger.create_logger(PERMISSION_LOGS_DIR)
-            do_log.info("入参：{}".format(json.dumps(params).encode().decode('unicode_escape')))
-            do_log.info("接口返回：{}".format(result) + "\n")
-            # 该断言方式-断言失败后仍继续执行后面的代码
-            pytest.assume(compare_data[0] == compare_data[1])
-            # assert compare_data[0] == compare_data[1]
-
-    # holder, step_list = init_case("功能数据权限模块")
-
-    # @pytest.mark.parametrize("case_info", holder.case_infos, ids=step_list)
-    # def test_application(self, case_info):
-    #
-    #     # 填充登陆信息的 token
-    #     case_info.headers = {} if str_is_none(case_info.headers) else json.loads(case_info.headers)
-    #     if self.cookie:
-    #         case_info.headers.update({'Cookie': self.cookie})
-    #     # 填充占位符参数
-    #     self.holder.parse_param(case_info).parse_path(case_info)
-    #     handler = HttpHandler(case_info)
-    #     # 执行请求
-    #
-    #     # 判断用例是否需要执行
-    #     if case_info.run == 'no':
-    #         case_info.status = 'skip'
-    #     else:
-    #         result, compare_data, params = handler.execute(self.holder.case_infos)
-    #         # ascii转中文
-    #         do_log = MyLogger.create_logger(PERMISSION_LOGS_DIR)
-    #         do_log.info("入参：{}".format(json.dumps(params).encode().decode('unicode_escape')))
-    #         do_log.info("接口返回：{}".format(result) + "\n")
-    #         # 该断言方式-断言失败后仍继续执行后面的代码
-    #         pytest.assume(compare_data[0] == compare_data[1])
-    #         # assert compare_data[0] == compare_data[1]
-
-
-if __name__ == '__main__':
-    pytest.main()
+    # 判断用例是否需要执行
+    if case_info.run == 'no':
+        case_info.status = 'skip'
+    else:
+        result, compare_data, params = handler.execute(holder.case_infos)
+        # ascii转中文
+        do_log = MyLogger.create_logger(PERMISSION_LOGS_DIR)
+        do_log.info("入参：{}".format(json.dumps(params).encode().decode('unicode_escape')))
+        do_log.info("接口返回：{}".format(result) + "\n")
+        # 该断言方式-断言失败后仍继续执行后面的代码
+        pytest.assume(compare_data[0] == compare_data[1])
+    allure.dynamic.feature(sheet)
