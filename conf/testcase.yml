@@ -1,5 +1,5 @@
 test_env:
-  host: 10.30.30.26
+  host: 10.30.30.96
   port: 38080
 log:
   log_name: cases
