@@ -1,6 +1,6 @@
 sender:
   name: 设备组
-  addr: device-test@isyscore.com
+  addr: device-test11@isyscore.com
   host: smtp.exmail.qq.com
   port: 465
   password: qFy7Tp6aX44trRgb

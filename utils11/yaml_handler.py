@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import yaml
 
-from utils.path_handler import CONFIG_FILE_PATH
+from utils11.path_handler import CONFIG_FILE_PATH
 
 
 class HandleYaml:

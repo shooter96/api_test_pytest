@@ -2,8 +2,8 @@ import requests
 import time
 import json
 from requests import Response
-from utils.test_utils import str_is_none
-from utils.test_utils import get_value
+from utils11.test_utils import str_is_none
+from utils11.test_utils import get_value
 import redis
 
 content_type = 'Content-Type'
@@ -218,3 +218,4 @@ class HttpHandler:
         else:
             out = out.replace('failed', '\033[0;37;41m' + 'failed' + '\033[0m')
         print(out, flush=True)
+

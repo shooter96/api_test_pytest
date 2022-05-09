@@ -1,0 +1,37 @@
+test_env:
+  core_test:
+    host: 10.30.30.96
+    port: 38080
+  integrated_test:
+    host: 10.30.30.91
+    port: 38080
+  core_dev:
+    host: 10.30.30.26
+    port: 38080
+
+
+mock_device:
+  mqtt:
+    dev_id: auto_direct_001
+    pk: dmc_pk_d001
+    secret: bbbbbbbbbbbbbb16
+    port: 21883
+  coap:
+    dev_id: auto_coap_001
+    pk: dmc_pk_coap
+    secret: bbbbbbbbbbbbbb16
+    port: 25683
+  http:
+    dev_id: auto_http_001
+    pk: dmc_pk_http
+    secret: bbbbbbbbbbbbbb16
+    port: 37401
+
+
+log:
+  log_name: cases
+  logger_level: DEBUG
+  formatter: '%(asctime)s - [%(filename)s-->line:%(lineno)d] - %(levelname)s: %(message)s'
+  stream_level: DEBUG
+  logfile_name: test.log
+  logfile_level: DEBUG

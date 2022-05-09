@@ -2,7 +2,7 @@ import os
 import platform
 import yaml
 
-from utils.emaillib.send_email import send_text_email, EmailInfo
+from utils11.emaillib.send_email import send_text_email, EmailInfo
 
 """
 还应该提供
