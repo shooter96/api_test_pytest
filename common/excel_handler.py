@@ -1,6 +1,6 @@
 # @author: wy
 # @project:api_test_pytest
-
+import time
 from openpyxl import load_workbook
 import logging
 import json
@@ -12,7 +12,7 @@ class CaseInfo:
     # 用于存放测试用例
     def __init__(self):
         self.host = None
-        self.header = {}
+        self.headers = {}
 
 
 class ExcelHandler:
@@ -72,7 +72,7 @@ class CaseInfoHandler:
         # 获取请求地址信息（获取单元格的值,下标从1开始）
         self.default_host = self.sheet.cell(row=4, column=2).value
         # 构造登录信息
-        self.login_info = CaseInfo
+        self.login_info = CaseInfo()
         self.build_login_info()
 
         # 构造所有用例信息
@@ -93,46 +93,17 @@ class CaseInfoHandler:
         for row in range(5, len(self.rows)):
             # 取整行数据为列表
             case = [column.value for column in self.rows[row]]
-            case_info = CaseInfo
+            case_info = CaseInfo()
             # 将表头与测试数据打包成元组,返回的是带元组的列表
             for i in zip(self.title, case):
                 # 将对应的key，value分别设为对象属性名和属性值(反射机制)
                 setattr(case_info, i[0], i[1])
-                case_info.host = self.default_host
+            case_info.host = self.default_host
+            case_info.url = None
+            # 定义当前用例所在行数(其实该行数为实际对应 Excel 中行数减 1)
+            case_info.row = row
             # 将每行生成的用例数据添加到用例列表中
             self.case_infos.append(case_info)
-
-    def build_request(self, case_info):
-        """
-        1、更新请求头
-        2、 判断请求头类型，对请求体进行数据类型处理
-        """
-        # 获取到请求参数
-        params = case_info.params
-        # 构建请求头
-        headers = {}
-        # 定义一个字典，用于文件上传
-        files = {}
-        if not case_info.headers or headers['Content-Type'] == 'application/json':
-            # 如果excel中的headers为空则设为json格式
-            headers['Content-Type'] = 'application/json'
-            # 将body参数设置为json格式
-            params = json.dumps(params)
-        else:
-            # 否则为表单形式
-            headers['Content-Type'] = 'multipart/form-data'
-            # 循环字典,拿到字典最外层的key
-            for param in params:
-                # 判断是否为文件上传
-                value = params[param]
-                if str(value).startswith('file:'):
-                    try:
-                        # 以二进制流加载到files中
-                        files[param] = open(str(value).split(':')[1], mode='rb')
-                    except IOError:
-                        files.update({param: None})
-        url = case_info.host + case_info.path
-        return url, headers, params, files
 
     def parse_params(self, case_info):
         '''
@@ -142,6 +113,7 @@ class CaseInfoHandler:
 
         '''
         params = getattr(case_info, 'params')
+        params = {} if not params else json.loads(params)
         ex_keys = getattr(case_info, 'ex_keys')
         ex_values = getattr(case_info, 'ex_values')
         relay_key = getattr(case_info, 'relay_keys')
@@ -162,12 +134,11 @@ class CaseInfoHandler:
                     relay_value = self.get_relay_value(row, steps[1])
                     # 将得到的依赖值更新到parmas中
                     self.set_relay_value(params, key, relay_value)
-                    setattr(case_info, 'params', params)
-
                 except ValueError:
                     raise "依赖key{}不存在".format(steps[0])
-            # 返回当前 Handler
-            return self
+        setattr(case_info, 'params', params)
+        # 返回当前 Handler
+        return self
 
     def parse_path(self, case_info):
         """
@@ -193,24 +164,6 @@ class CaseInfoHandler:
         # 返回当前 Handler
         return self
 
-    def get_value(self, source, step):
-        '''
-        source: 依赖的的实际内容 {}
-        setp: 取值的步骤
-        '''
-
-        step_list = str(step).split('.')
-        for key in step_list:
-            try:
-                # 如果为数字则转为数字(数字代表从列表取值)，否则为字符
-                # isdigit() 方法检测字符串是否只由数字组成。
-                key = key if not key.isdigit() else int(key)
-                source = source[key]
-            except Exception as e:
-                return " "
-
-        return source
-
     def get_relay_value(self, row, step):
         '''
         row: 依赖的行
@@ -235,7 +188,8 @@ class CaseInfoHandler:
             ci = json.loads(response_content)
         else:
             return None
-        return self.get_value(ci, step)
+        from common.utils_handler import get_value
+        return get_value(ci, step)
 
     def set_relay_value(self, params, step, value):
         """

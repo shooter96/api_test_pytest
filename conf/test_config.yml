@@ -35,3 +35,9 @@ log:
   stream_level: DEBUG
   logfile_name: test.log
   logfile_level: DEBUG
+
+service:
+  #设置服务名称映射关系
+  permission: isc-permission-service
+  dmc: isc-dmc-service
+  video: isc-viedo-service

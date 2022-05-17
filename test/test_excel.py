@@ -1,31 +1,42 @@
 # @author: wy
 # @project:api_test_pytest
+import json
+
 import pytest
+import allure
+import logging
 
-from common.excel_handler import CaseInfoHandler, ExcelHandler
-import requests
+from common.get_excel_case import *
 
 
+@allure.epic("执行excel表格内用例")
 class TestExcelCases:
-    @classmethod
-    def setup_class(cls):
-        work_book = ExcelHandler('../datas/isc-permission-service/多租户-权限管理.xlsx').work_book
-        sheet = '默认租户管理员'
-        login_info = CaseInfoHandler(work_book, sheet).build_login_info()
-        cls.params = login_info.params
-        cls.login_response = requests.post(url=login_info.url, json=eval(login_info.params), headers=login_info.header)
-        print(cls.login_response)
-
     # 登录获取token、填充占位符参数、执行请求、断言（取执行结果passed断言，非passed则为执行不通过）
+    str_ids = ["{}_{}".format(j.description, j.step) for i, j, k, m in
+               getCasesInfoFromExcel(service_name='isc-permission-service')]
 
-    @pytest.mark.parametrize('holder,sheet_name,case_info', '调用方法,获取sheet以及case', ids=[])
-    def test_excel_cases(self, holder, sheet_name, case_info):
-        # 先登录
-        # 再执行请求
-        # allure报告
-        print(self.params)
-        print(self.login_response.json())
-        assert 1 == 1
+    @pytest.mark.parametrize('sheet,case_info,src,handler',
+                             getCasesInfoFromExcel(service_name='isc-permission-service'),
+                             ids=str_ids)
+    def test_excel_cases_permission(self, sheet, case_info, src, handler):
+        request_handler = RequestInfo(src, sheet, case_info, handler)  # 查看headers
+
+        # 登录填充token
+        token = RequestInfo(src, sheet, handler.login_info, handler).set_token()
+        case_info.headers.update({'token': token})
+        # 执行请求
+        result = request_handler.do_request()
+        try:
+            print("入参:{}".format(case_info.params))
+            print('')
+            print("出参:{}".format(result))
+        except Exception as e:
+            raise e
+
+        if case_info.status == "passed":
+            assert True
+        else:
+            assert False
 
 
 if __name__ == '__main__':
