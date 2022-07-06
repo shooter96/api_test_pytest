@@ -29,7 +29,7 @@ def getCasesInfoFromExcel(service_name, version='latest'):
                     else case_info.run
                 run_status = run_status.lower()
                 if run_status == 'yes':
-                    # yield输出的是一个对象，相当于一个容器，想取什么数据就取什么数据
+                    # yield 生成器生成迭代器   输出的是一个对象，相当于一个容器，想取什么数据就取什么数据
                     yield sheet, case_info, src, handler
 
 
@@ -77,8 +77,7 @@ class RequestInfo:
 
         # 填充占位符参数
         self.case_handler.parse_params(self.case_info).parse_path(self.case_info)
-        # 执行请求
-        # http_handler = HttpRequest(self.case_info)
+        # 执行请求,传case_infos列表是因为后续断言的值，可能需要从其他用例中获取到依赖值
         result = self.http_request.execute(self.case_handler.case_infos)
         return result
 

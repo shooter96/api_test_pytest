@@ -2,41 +2,36 @@
 # @project:api_test_pytest
 import json
 import time
-
 from common.utils_handler import get_value
-
+from common.path_handler import *
 import requests
 
 
 # 请求方法封装，普通get(表单、路径传参)、post（普通body传参、文件上传）、put、delete等方法封装
 class HttpRequest:
     def __init__(self, case_info):
-        self.method = case_info.method
-        self.params = case_info.params
-        self.headers = case_info.headers
-        self.url = case_info.url
-        self.response = {}
         self.case_info = case_info
+        self.method = case_info.method
 
-    def http_request(self, files):
+    def http_request(self, url, headers, params, files):
         """
         封装请求方法
         """
 
         if files:
             if self.method == 'post':
-                self.response = requests.post(url=self.url, data=self.params, headers=self.headers, files=files)
+                self.response = requests.post(url=url, data=params, headers=headers, files=files)
             elif self.method == 'put':
-                self.response = requests.put(url=self.url, data=self.params, headers=self.headers, files=files)
+                self.response = requests.put(url=url, data=params, headers=headers, files=files)
         else:
             if self.method == 'post':
-                self.response = requests.post(url=self.url, json=self.params, headers=self.headers)
+                self.response = requests.post(url=url, json=params, headers=headers)
             elif self.method == 'put':
-                self.response = requests.put(url=self.url, json=self.params, headers=self.headers)
+                self.response = requests.put(url=url, json=params, headers=headers)
             elif self.method == 'get':
-                self.response = requests.get(url=self.url, params=self.params, headers=self.headers)
+                self.response = requests.get(url=url, params=params, headers=headers)
             elif self.method == 'delete':
-                self.response = requests.delete(url=self.url, params=self.params, headers=self.headers)
+                self.response = requests.delete(url=url, params=params, headers=headers)
 
         return self.response.json()
 
@@ -58,17 +53,18 @@ class HttpRequest:
             # 如果excel中的headers为空则设为json格式
             headers['Content-Type'] = 'application/json'
 
-        else:
+        elif headers['Content-Type'] == 'multipart/form-data':
             # 否则为表单形式
-            headers['Content-Type'] = 'multipart/form-data'
-            # 循环字典,拿到字典最外层的key
+            # 删除Content-Type,否则请求会报错
+            headers.pop('Content-Type')
             for param in params:
                 # 判断是否为文件上传
                 value = params[param]
                 if str(value).startswith('file:'):
                     try:
                         # 以二进制流加载到files中
-                        files[param] = open(str(value).split(':')[1], mode='rb')
+                        filepath = os.path.join(BASE_DIR, str(value).split(':')[1])
+                        files[param] = open(filepath, mode='rb')
                     except IOError:
                         files.update({param: None})
         url = self.case_info.host + self.case_info.path
@@ -79,8 +75,8 @@ class HttpRequest:
         获取登录信息
         """
         try:
-            result = requests.post(url=self.url, data=self.params,
-                                   headers=self.headers)
+            result = requests.post(url=self.case_info.url, data=self.case_info.params,
+                                   headers=self.case_info.headers)
             if result.status_code == 200:
                 token = result.json()['data']['token']
                 print('登录成功 token:', token)
@@ -101,10 +97,6 @@ class HttpRequest:
         result = {}
         if request:
             url, headers, params, files = request
-            self.url = url
-            self.params = params
-            self.headers = headers
-            self.files = files
 
         else:
             return None
@@ -121,7 +113,7 @@ class HttpRequest:
         self.run_status = run_status.lower()
         if self.run_status == 'yes':
             # 请求
-            result = self.http_request(self.files)
+            result = self.http_request(url, headers, params, files)
 
             # 计算请求耗时
             time_used = int((time.time() - start) * 1000)
@@ -201,3 +193,10 @@ class HttpRequest:
         else:
             out = out.replace('failed', '\033[0;37;41m' + 'failed' + '\033[0m')
         print(out, flush=True)
+
+
+if __name__ == '__main__':
+    path = os.path.join(BASE_DIR, 'files/v3.0/DRIVER/DahuaIPCVideo_3.1.0.json')
+    f = open(path, mode='rb')
+    a = f.readlines()
+    print(a)
